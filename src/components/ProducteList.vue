@@ -5,7 +5,7 @@
     productes: Array, // Llistat de productes
   });
 
-  const searchQuery = ref(""); // Filtre per nom
+  const searchProducteQuery = ref(""); // Recerca per nom
   const sortBy = ref("productName"); // Camp d'ordenació per defecte
   const sortDirection = ref("asc"); // Direcció ascendent
 
@@ -23,7 +23,7 @@
   const filteredAndSortedProductes = computed(() => {
     return [...props.productes]
       .filter(producte => 
-        producte.productName.toLowerCase().includes(searchQuery.value.toLowerCase())
+        producte.productName.toLowerCase().includes(searchProducteQuery.value.toLowerCase())
       )
       .sort((a, b) => {
         let modifier = sortDirection.value === "asc" ? 1 : -1;
@@ -38,7 +38,7 @@
   <div class="mt-4">
     <!-- Input de filtrat -->
     <input 
-      v-model="searchQuery" 
+      v-model="searchProducteQuery" 
       type="text" 
       placeholder="Filtrar per nom del producte..."
       class="border border-gray-300 p-2 rounded w-full mb-2"

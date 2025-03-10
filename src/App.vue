@@ -1,11 +1,12 @@
 <script setup>
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, computed } from 'vue';
   import ProducteList from './components/ProducteList.vue'; // Importar el component Producte
 
   const clients = ref([]); // Llistat de clients
   const productes = ref([]); // Llistat de productes
   const activeClient = ref(null); // Client amb productes visibles
   const loading = ref(true); // Estat de càrrega
+  const searchClientQuery = ref(""); // Recerca de clients
 
   onMounted(async () => {
     try {
@@ -34,6 +35,17 @@
   const getProductesByClient = (customerId) => {
     return productes.value.filter(product => product.customerId === customerId);
   };
+
+  // Filtrar y ordenar clientes
+  const filteredClients = computed(() => {
+    return [...clients.value]
+      .filter(client => {
+        const searchTerm = searchClientQuery.value.toLowerCase();
+        return Object.values(client).some(value =>
+          String(value).toLowerCase().includes(searchTerm)
+        );
+      });
+  });
 </script>
 
 <template>
@@ -49,8 +61,21 @@
     </div>
 
     <div v-else-if="clients.length">
+      <!-- Input de filtrat -->
+      <input 
+        v-model="searchClientQuery" 
+        type="text" 
+        placeholder="Filtrar per clients..."
+        class="border border-gray-300 p-2 rounded w-full mb-2"
+      />
+      
+      <!-- Si no hay productos, mostrar mensaje -->
+      <p v-if="filteredClients.length === 0" class="text-center text-gray-500 py-4">
+        No hi ha clients disponibles.
+      </p>
+
       <!-- Targeta client -->
-      <div v-for="client in clients" :key="client._id" class="bg-white shadow-md rounded-lg p-6 mb-6 border border-gray-200">
+      <div v-else v-for="client in filteredClients" :key="client._id" class="bg-white shadow-md rounded-lg p-6 mb-6 border border-gray-200">
         <div class="flex justify-between items-center">
           <div>
             <h2 class="text-xl font-semibold text-gray-800">{{ client.givenName }} {{ client.familyName1 }}</h2>
