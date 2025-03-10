@@ -1,13 +1,37 @@
 <script setup>
   import { ref, onMounted } from 'vue';
-  const clients = ref([]); // Estat reactiu
 
-  onMounted(() => {
-    fetch('http://localhost:3000/client') // Realitzar la sol·licitud GET per obtenir les dades al servidor
-      .then(response => response.json()) // Parsejar la resposta com a JSON
-      .then(data => clients.value = data) // Ara 'clients.value' conté les dades del fitxer JSON
-      .catch(error => console.error(error.message));
+  const clients = ref([]); // Llistat de clients
+  const productes = ref([]); // Llistat de productes
+  const activeClient = ref(null); // Client amb productes visibles
+
+  onMounted(async () => {
+    try {
+      const [clientsData, productsData] = await Promise.all([
+        fetch('http://localhost:3000/client').then(res => res.json()),
+        fetch('http://localhost:3000/producte').then(res => res.json())
+      ]);
+
+      // Asignar dades
+      clients.value = clientsData;
+      productes.value = productsData;
+
+    } catch (error) {
+      console.error("Error al carregar les dades:", error.message);
+    } finally {
+      loading.value = false; // Ocultar indicador de càrrega
+    }
   });
+
+  // Funció per canviar la visibilitat dels productes
+  const toggleProductes = (customerId) => {
+    activeClient.value = activeClient.value === customerId ? null : customerId;
+  };
+
+  // Obtenir els productes contractats per un client segons el seu customerId
+  const getProductesByClient = (customerId) => {
+    return productes.value.filter(product => product.customerId === customerId);
+  };
 </script>
 
 <template>
@@ -26,6 +50,40 @@
             <p class="text-gray-500">{{ client.phone }}</p>
             <p class="text-gray-400 text-sm">{{ client.docType.toUpperCase() }}: {{ client.docNum }}</p>
           </div>
+          <!-- Botó per mostrar/ocultar els productes -->
+          <button 
+            @click="toggleProductes(client.customerId)"
+            class="bg-yellow-400 px-4 py-2 rounded-lg hover:bg-yellow-300 cursor-pointer"
+          >
+            {{ activeClient === client.customerId ? 'Ocultar Productes' : 'Veure Productes' }}
+          </button>
+        </div>
+
+        <!-- Llista de productes -->
+        <div v-if="activeClient === client.customerId" class="mt-4">
+          <h3 class="font-semibold text-gray-700 mb-2">Productes contractats:</h3>
+          <table class="w-full border-collapse border border-yellow-500">
+            <thead class="bg-yellow-400 opacity-75">
+              <tr>
+                <th class="border border-gray-300 px-4 py-2 text-left">Nom</th>
+                <th class="border border-gray-300 px-4 py-2 text-center">Tipus</th>
+                <th class="border border-gray-300 px-4 py-2 text-right">Velocitat / Dades</th>
+                <th class="border border-gray-300 px-4 py-2 text-right">Número Terminal</th>
+                <th class="border border-gray-300 px-4 py-2 text-right">Data Compra</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="producte in getProductesByClient(client.customerId)" :key="producte._id" class="hover:bg-gray-50">
+                <td class="border border-gray-300 px-4 py-2">{{ producte.productName }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-center">{{ producte.productTypeName.toUpperCase() }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-right">
+                  {{ producte.mbSpeed ? producte.mbSpeed + 'MB' : producte.gbData + 'GB' }}
+                </td>
+                <td class="border border-gray-300 px-4 py-2 text-right">{{ producte.numeracioTerminal }}</td>
+                <td class="border border-gray-300 px-4 py-2 text-right">{{ new Date(producte.soldAt).toLocaleDateString() }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
       </div>
