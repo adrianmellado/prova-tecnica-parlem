@@ -3,21 +3,23 @@
   import ProducteList from './components/ProducteList.vue'; // Importar el component Producte
 
   const clients = ref([]); // Llistat de clients
-  const productes = ref([]); // Llistat de productes
   const activeClient = ref(null); // Client amb productes visibles
   const loading = ref(true); // Estat de càrrega
   const searchClientQuery = ref(""); // Recerca de clients
 
   onMounted(async () => {
     try {
-      const [clientsData, productsData] = await Promise.all([
+      const [clientsData, productesData] = await Promise.all([
         fetch('http://localhost:3000/client').then(res => res.json()),
         fetch('http://localhost:3000/producte').then(res => res.json())
       ]);
 
-      // Asignar dades
-      clients.value = clientsData;
-      productes.value = productsData;
+      // Asignar productes directament a cada client
+      clients.value = clientsData.map(client => ({
+        ...client,
+        productes: productesData.filter(p => p.customerId === client.customerId)
+      }));
+      console.log();
 
     } catch (error) {
       console.error("Error al carregar les dades:", error.message);
@@ -29,11 +31,6 @@
   // Funció per canviar la visibilitat dels productes
   const toggleProductes = (customerId) => {
     activeClient.value = activeClient.value === customerId ? null : customerId;
-  };
-
-  // Obtenir els productes contractats per un client segons el seu customerId
-  const getProductesByClient = (customerId) => {
-    return productes.value.filter(product => product.customerId === customerId);
   };
 
   // Filtrar y ordenar clientes
@@ -94,7 +91,7 @@
 
         <!-- Llista de productes -->
         <Transition name="slide-fade">
-          <ProducteList v-if="activeClient === client.customerId" :productes="getProductesByClient(client.customerId)" />
+          <ProducteList v-if="activeClient === client.customerId" :productes="client.productes" />
         </Transition>
       </div>
     </div>

@@ -75,8 +75,8 @@
         {
             "_id": 1111115,
             "productName": "FIBRA 1000GB",
-            "mbSpeed": 1000,
-            "gbData": null,
+            "mbSpeed": null,
+            "gbData": 1000,
             "productTypeName": "ftth",
             "numeracioTerminal": 933933938,
             "soldAt": "2024-01-09 14:26:17",
