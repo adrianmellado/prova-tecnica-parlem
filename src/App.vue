@@ -10,8 +10,8 @@
   onMounted(async () => {
     try {
       const [clientsData, productesData] = await Promise.all([
-        fetch('http://localhost:3000/client').then(res => res.json()),
-        fetch('http://localhost:3000/producte').then(res => res.json())
+        fetch('https://prova-tecnica-parlem.onrender.com/client').then(res => res.json()),
+        fetch('https://prova-tecnica-parlem.onrender.com/producte').then(res => res.json())
       ]);
 
       // Asignar productes directament a cada client
