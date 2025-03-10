@@ -12,6 +12,7 @@ export default defineConfig({
     vueDevTools(),
     tailwindcss(),
   ],
+  base: 'https://adrianmellado.github.io/prova-tecnica-parlem',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
